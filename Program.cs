@@ -11,6 +11,10 @@ internal class Program
         string zipPath = $@"{basePath}\Result.zip";
         string extractPath = $@"{basePath}\Extract";
 
+        if (!Directory.Exists(startPath)) Directory.CreateDirectory(startPath);
+
+        if (!Directory.Exists(basePath)) Directory.CreateDirectory(extractPath); 
+
         Console.WriteLine("Welcome to my File IO Project\n");
 
         Menu.ListAllCommands();
