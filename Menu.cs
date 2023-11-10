@@ -1,4 +1,6 @@
 ﻿using System.IO.Compression;
+using System.Runtime.CompilerServices;
+using System.Xml;
 
 namespace file_io_project
 {
@@ -78,7 +80,7 @@ namespace file_io_project
                 return;
             }
 
-            ZipFile.CreateFromDirectory(startPath, zipPath);
+            System.IO.Compression.ZipFile.CreateFromDirectory(startPath, zipPath);
 
             var amountOfFiles = Directory.GetFiles(startPath).Length;
 
@@ -94,11 +96,23 @@ namespace file_io_project
                 return;
             }
 
-            ZipFile.ExtractToDirectory(zipPath, extractPath);
+            System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractPath);
 
             var amountOfFiles = Directory.GetFiles(extractPath).Length;
 
             Console.WriteLine($"Extracted ({amountOfFiles}) file(s)");
+        }
+
+        public static void ExtractProjectToXml(string basePath)
+        {
+            string path = @$"{basePath}\project.als";
+
+            string extractpath = $@"{basePath}\Extract";
+
+            ZipFile.ExtractToDirectory(path, extractpath);
+
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.Load(Path.Combine(extractpath, "project.xml"));
         }
     }
 }

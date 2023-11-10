@@ -9,6 +9,7 @@
         Delete,
         Extract,
         Exit,
-        Zip
+        Zip,
+        Xml
     }
 }

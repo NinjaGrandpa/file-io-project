@@ -1,6 +1,5 @@
 ﻿using file_io_project;
 
-
 internal class Program
 {
     private static void Main(string[] args)
@@ -67,6 +66,11 @@ internal class Program
                 case nameof(Commands.Extract):
                     Console.WriteLine("\nExtracting files from 'Result.zip'");
                     Menu.ExtractFiles(zipPath, extractPath);
+                    break;
+
+                case nameof(Commands.Xml):
+                    Console.WriteLine("\nExtracting Project files to XML");
+                    Menu.ExtractProjectToXml(basePath);
                     break;
 
                 case nameof(Commands.Exit):
