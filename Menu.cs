@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Xml;
 
@@ -41,15 +42,16 @@ namespace file_io_project
 
             if (!File.Exists(filePath))
             {
-                using (StreamWriter sw = File.CreateText(filePath)) {
+                using (StreamWriter sw = File.CreateText(filePath))
+                {
                     sw.WriteLine(fileContent);
                 }
 
                 Console.WriteLine($"File '{fileName}' created.");
-                return; 
-            }
-                Console.WriteLine($"File '{fileName}' already exists");
                 return;
+            }
+            Console.WriteLine($"File '{fileName}' already exists");
+            return;
         }
 
         public static void DeleteFile(string fileName, string path)
@@ -91,7 +93,8 @@ namespace file_io_project
 
         public static void ExtractFiles(string zipPath, string extractPath)
         {
-            if (!File.Exists(zipPath)){
+            if (!File.Exists(zipPath))
+            {
                 Console.WriteLine($"No zip called '{zipPath}' found");
                 return;
             }
@@ -105,14 +108,55 @@ namespace file_io_project
 
         public static void ExtractProjectToXml(string basePath)
         {
-            string path = @$"{basePath}\project.als";
-
+            string projectPath = @$"{basePath}\project.als";
             string extractpath = $@"{basePath}\Extract";
 
-            ZipFile.ExtractToDirectory(path, extractpath);
+            string decompressedFileName = $@"{basePath}\project.xml";
 
-            XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.Load(Path.Combine(extractpath, "project.xml"));
+            using FileStream projectFile = File.Open(projectPath, FileMode.Open);
+
+            using FileStream outputFileStream = File.Create(decompressedFileName);
+
+            using var decompressor = new GZipStream(projectFile, CompressionMode.Decompress);
+
+            decompressor.CopyTo(outputFileStream);
+        }
+
+        public static void CompressXmlToGzip(string basePath)
+        {
+            string gzipFilePath = @$"{basePath}\streams.gz";
+
+            var gzipFile = File.Create(gzipFilePath);
+
+            using (GZipStream compressor = new GZipStream(gzipFile, CompressionMode.Compress))
+            {
+                using (XmlWriter xmlGzip = XmlWriter.Create(compressor))
+                {
+                    xmlGzip.WriteStartDocument();
+                    xmlGzip.WriteStartElement("callsigns");
+                    xmlGzip.WriteElementString("callsign", "test123dojdoj");
+                }
+            }
+
+            Console.WriteLine($"{gzipFilePath} contains {new FileInfo(gzipFilePath).Length} bytes.");
+            Console.WriteLine(File.ReadAllText(gzipFilePath));
+            Console.WriteLine("Reading the compressed XML file:");
+
+            gzipFile = File.Open(gzipFilePath, FileMode.Open);
+            using (GZipStream decompressor = new GZipStream(gzipFile, CompressionMode.Decompress))
+            {
+                using (XmlReader reader = XmlReader.Create(decompressor))
+                {
+                    while (reader.Read())
+                    {
+                        if ((reader.NodeType == XmlNodeType.Element) && (reader.Name == "callsign"))
+                        {
+                            reader.Read();
+                            Console.WriteLine(reader.Value.ToString());
+                        }
+                    }
+                }
+            }
         }
     }
 }
